@@ -1,12 +1,12 @@
 from MythTV import MythDB
 from MythTV import MythBE
 
-mythConfig = '/home/mythtv/config.xml'
+mythConfig = '/home/mythtv/.mythtv/config.xml'
 #mythConfig = '/home/mike/mythtv.xml'
 
 import xml.etree.ElementTree as ET
 
-def deleteProgram(basename)
+def deleteProgram(basename):
     tree = ET.parse(mythConfig)
     root = tree.getroot()
 
@@ -19,8 +19,8 @@ def deleteProgram(basename)
 
     showInfoGen = db1.searchRecorded(basename=basename)
     showInfo = next(showInfoGen)
-    showObject = be1.getRecording(y['chanid'],y['starttime'])
+    showObject = be1.getRecording(showInfo['chanid'],showInfo['starttime'])
 
-    deletedShow = be1.deleteRecording(z,force=True) #Return -1 means success
+    deletedShow = be1.deleteRecording(showObject,force=True) #Return -1 means success
 
 
