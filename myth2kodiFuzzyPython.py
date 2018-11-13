@@ -7,8 +7,12 @@ import tvdb_api
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 import logging
+import sys
 
-logging.basicConfig(filename='example.log',level=logging.INFO)
+
+logging.basicConfig(filename='myth2kodiFuzzyPython.log',format='%(asctime)s %(message)s',level=logging.INFO)
+
+myth2kodiFuzzyPython_apikey ='0E2AC500-E296-4756-BE20-6B5D192622E6'
 
 #Test Values
 testTitle = 'Late Night with Seth Meyers'
@@ -33,8 +37,12 @@ def fuzzyMatch(title,subtitle,show,minRatio):
 
 def findEpisodeData(showTitle,epTitle,fuzzyRatio=95):
     #Get DB info
-    t = tvdb_api.Tvdb()
-    show = t[showTitle]
+    t = tvdb_api.Tvdb(apikey=myth2kodiFuzzyPython_apikey)
+    try:
+        show = t[showTitle]
+    except Exception as e:
+        logging.exception("API Error: %s",type(e).__name__)
+        return 0
 
     filenamePreamble = showTitle.replace(' ','_')
 
@@ -54,4 +62,31 @@ def findEpisodeData(showTitle,epTitle,fuzzyRatio=95):
         return filenamePreamble + "-S" + str(showdata[0]) + "E" + str(showdata[1])
             
 def main():
-    return findEpisodeData(testTitle,testSubtitle)
+    """Will return a tvshow name with season and episode number, or 0 if none is found
+    errors will return an exit code of 1. Errors are logged to myth2kodiFuzzyPython.log
+
+    Parameters: "Show Name" "Episode Description"
+    Optional third parameter is a ratio from 0-100 on how close a fuzzy match will be:
+    "Show Name" "Episode Description" 85
+    """
+    if len(sys.argv) < 3:
+        logging.error("ERROR: Too few arguments. Expected at least 2, got %d",len(sys.argv)-1)
+        sys.exit(1)
+    if len(sys.argv) > 4:
+        logging.error("ERROR: Too many arguments. Expected 2 or 3, got %d",len(sys.argv)-1)
+        sys.exit(1)
+    if len(sys.argv) == 4:
+        try:
+            ratio = int(sys.argv[3])
+        except:
+            logging.error("ERROR: Expected third argument to be a number but it was %s",sys.argv[3])
+            sys.exit(1)
+        print(findEpisodeData(sys.argv[1], sys.argv[2], ratio))
+        sys.exit(0)
+    if len(sys.argv) == 0:
+        print(findEpisodeData(sys.argv[1], sys.argv[2]))
+        sys.exit(0)
+    sys.exit(1)
+
+if __name__ == '__main__':
+        main()
