@@ -8,11 +8,10 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 import logging
 import sys
-import os
+from operator import itemgetter
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-logfile = os.path.join(dir_path,'myth2kodiFuzzyPython.log')
-logging.basicConfig(filename=logfile,format='%(asctime)s %(message)s',level=logging.INFO)
+
+logging.basicConfig(filename='myth2kodiFuzzyPython.log',format='%(asctime)s %(message)s',level=logging.INFO)
 
 myth2kodiFuzzyPython_apikey ='0E2AC500-E296-4756-BE20-6B5D192622E6'
 
@@ -29,42 +28,51 @@ def exactMatch(title,subtitle,show):
     return None
 
 def fuzzyMatch(title,subtitle,show,minRatio):
+    found = list()
     seasons = sorted(show.keys(),reverse=True)
     for season in seasons:
         for ep in show[season].keys():
-	    if type(subtitle) != unicode:
-		subtitle.decode('utf-8')
-            ratio = fuzz.partial_ratio(show[season][ep]['episodeName'],subtitle)
+            ratio = fuzz.partial_ratio(show[season][ep]['episodeName'],subtitle.decode("utf-8"))
             #print(ratio)
-            if ratio > 85:
-                return(season,ep,ratio)
-    return None
+            if ratio > minRatio:
+                found.append((season,ep,ratio))
+                #print(found[-1])
+    if len(found) == 0:
+        return None
+    else:
+        topIdx = max(enumerate(map(itemgetter(-1), found)),key=itemgetter(1))[0]
+        return found[topIdx]
+        
 
-def findEpisodeData(showTitle,epTitle,fuzzyRatio=95):
-    #Get DB info
+def getShow(showTitle):
     t = tvdb_api.Tvdb(apikey=myth2kodiFuzzyPython_apikey)
     try:
         show = t[showTitle]
+        return show
     except Exception as e:
         logging.exception("API Error: %s",type(e).__name__)
-        return 0
+        return None    
+
+def findEpisodeFilename(showTitle,epTitle,fuzzyRatio=85):
+    #Get DB info
+    show = getShow(showTitle)
 
     filenamePreamble = showTitle.replace(' ','_')
 
     logging.info("Trying exact match...")
-    showdata = exactMatch(testTitle,epTitle,show)
-    if showdata == None:
-        logging.info("No exact match found. Trying fuzzy match...")
-        showdata = fuzzyMatch(testTitle,epTitle,show,fuzzyRatio)
-        if showdata == None:
-            logging.info("No subtitle match could be found. Exiting.")
-            return 0
-        else:
-            logging.info("Fuzzy match ratio: %d Season: %d Episode: %d", showdata[2], showdata[0], showdata[1])
-            return filenamePreamble + "-S" + str(showdata[0]) + "E" + str(showdata[1])
-    else:
+    exactEpisode = exactMatch(testTitle,epTitle,show)
+    if exactEpisode != None:
         logging.info("Exact match! Season: %d Episode: %d", showdata[0], showdata[1])
         return filenamePreamble + "-S" + str(showdata[0]) + "E" + str(showdata[1])
+    
+    logging.info("No exact match found. Trying fuzzy match...")
+    fuzzyEpisode = fuzzyMatch(testTitle,epTitle,show,fuzzyRatio)
+    if showdata != None:
+        logging.info("Fuzzy match ratio: %d Season: %d Episode: %d", showdata[2], showdata[0], showdata[1])
+        return filenamePreamble + "-S" + str(showdata[0]) + "E" + str(showdata[1])
+
+    logging.info("No subtitle match could be found. Exiting.")
+    return 0
             
 def main():
     """Will return a tvshow name with season and episode number, or 0 if none is found
@@ -88,10 +96,10 @@ def main():
         except:
             logging.error("ERROR: Expected third argument to be a number but it was %s",sys.argv[3])
             sys.exit(1)
-        print(findEpisodeData(sys.argv[1], epName, ratio))
+        print(findEpisodeFilename(sys.argv[1], epName, ratio))
         sys.exit(0)
     if len(sys.argv) == 0:
-        print(findEpisodeData(sys.argv[1], epName))
+        print(findEpisodeFilename(sys.argv[1], epName))
         sys.exit(0)
     sys.exit(1)
 

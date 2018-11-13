@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from myth2kodiFuzzyPython import findEpisodeData
+from myth2kodiFuzzyPython import findEpisodeFilename
 import sys
 import os
 from shutil import copyfile
@@ -18,7 +18,7 @@ def main():
     recordingFile = sys.argv[1]
     showName = sys.argv[2].decode('utf-8')
     epName = sys.argv[3].decode('utf-8')
-    epFilename = findEpisodeData(showName,epName)
+    epFilename = findEpisodeFilename(showName,epName)
     if epFilename != "0":
         if os.path.isdir(storageDir) == False:
             logging.info("storageDir doesn't exist, aborting.")
