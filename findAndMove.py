@@ -4,6 +4,11 @@ from myth2kodiFuzzyPython import findEpisodeData
 import sys
 import os
 from shutil import copyfile
+import logging
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+logfile = os.path.join(dir_path,'myth2kodiFuzzyPython.log')
+logging.basicConfig(filename=logfile,format='%(asctime)s %(message)s',level=logging.INFO)
 
 recordingDir = "/Lenny/mythtv/"
 storageDir = "/Lenny/videoLibrary/TV/"
@@ -15,15 +20,17 @@ def main():
     epFilename = findEpisodeData(showName,epName)
     if epFilename != "0":
         if os.path.isdir(storageDir) == False:
-            print("storageDir doesn't exist, aborting.")
+            logging.info("storageDir doesn't exist, aborting.")
             sys.exit(1)
         if os.path.isdir(os.path.join(storageDir,showName)) == False:
-            print("making directory for this show: %s",os.path.join(storageDir,showName))
-            os.mkdir(os.path.join(storageDir,showName))
-        print("copying file")
+            logging.info("making directory for this show: %s",os.path.join(storageDir,showName))
+            os.mkdir(os.path.join(storageDir,showName),0777)
+	    os.chmod(os.path.join(storageDir,showName),0o777)
+        logging.info("copying file")
         fileDestination = os.path.join(storageDir,showName,epFilename+os.path.splitext(recordingFile)[-1])
         copyfile(os.path.join(recordingDir,recordingFile),fileDestination)
-        print("file copied to: %s",fileDestination)
+	os.chmod(fileDestination,0o777)
+        logging.info("file copied to: %s",fileDestination)
         sys.exit(0)
     sys.exit(1)
 

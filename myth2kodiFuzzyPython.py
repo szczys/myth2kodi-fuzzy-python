@@ -8,9 +8,11 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 import logging
 import sys
+import os
 
-
-logging.basicConfig(filename='myth2kodiFuzzyPython.log',format='%(asctime)s %(message)s',level=logging.INFO)
+dir_path = os.path.dirname(os.path.realpath(__file__))
+logfile = os.path.join(dir_path,'myth2kodiFuzzyPython.log')
+logging.basicConfig(filename=logfile,format='%(asctime)s %(message)s',level=logging.INFO)
 
 myth2kodiFuzzyPython_apikey ='0E2AC500-E296-4756-BE20-6B5D192622E6'
 
@@ -33,7 +35,7 @@ def fuzzyMatch(title,subtitle,show,minRatio):
 	    if type(subtitle) != unicode:
 		subtitle.decode('utf-8')
             ratio = fuzz.partial_ratio(show[season][ep]['episodeName'],subtitle)
-            print(ratio)
+            #print(ratio)
             if ratio > 85:
                 return(season,ep,ratio)
     return None
