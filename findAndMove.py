@@ -5,6 +5,7 @@ import sys
 import os
 from shutil import copyfile
 import logging
+from mythPythonBindings import deleteProgram
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 logfile = os.path.join(dir_path,'myth2kodiFuzzyPython.log')
@@ -31,6 +32,8 @@ def main():
         copyfile(os.path.join(recordingDir,recordingFile),fileDestination)
 	os.chmod(fileDestination,0o777)
         logging.info("file copied to: %s",fileDestination)
+	logging.info("deleting %s",recordingFile)
+	deleteProgram(recordingFile)
         sys.exit(0)
     sys.exit(1)
 
