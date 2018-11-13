@@ -30,7 +30,9 @@ def fuzzyMatch(title,subtitle,show,minRatio):
     seasons = sorted(show.keys(),reverse=True)
     for season in seasons:
         for ep in show[season].keys():
-            ratio = fuzz.partial_ratio(show[season][ep]['episodeName'],subtitle.decode("utf-8"))
+	    if type(subtitle) != unicode:
+		subtitle.decode('utf-8')
+            ratio = fuzz.partial_ratio(show[season][ep]['episodeName'],subtitle)
             print(ratio)
             if ratio > 85:
                 return(season,ep,ratio)

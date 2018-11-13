@@ -2,6 +2,7 @@ from __future__ import print_function
 
 from myth2kodiFuzzyPython import findEpisodeData
 import sys
+import os
 from shutil import copyfile
 
 recordingDir = "/Lenny/mythtv/"
@@ -9,9 +10,9 @@ storageDir = "/Lenny/videoLibrary/TV/"
 
 def main():
     recordingFile = sys.argv[1]
-    showName = sys.argv[2]
-    epName = sys.argv[3]
-    epFilename = findEpisodeData("Late Night with Seth Meyers","Claire Foy Lucas Hedges boygenius Franklin Vanderbilt")
+    showName = sys.argv[2].decode('utf-8')
+    epName = sys.argv[3].decode('utf-8')
+    epFilename = findEpisodeData(showName,epName)
     if epFilename != "0":
         if os.path.isdir(storageDir) == False:
             print("storageDir doesn't exist, aborting.")
@@ -20,7 +21,7 @@ def main():
             print("making directory for this show: %s",os.path.join(storageDir,showName))
             os.mkdir(os.path.join(storageDir,showName))
         print("copying file")
-        fileDestination = os.path.join(storageDir,showName,epFilename,os.path.splitext(recordingFile)[-1])
+        fileDestination = os.path.join(storageDir,showName,epFilename+os.path.splitext(recordingFile)[-1])
         copyfile(os.path.join(recordingDir,recordingFile),fileDestination)
         print("file copied to: %s",fileDestination)
         sys.exit(0)
