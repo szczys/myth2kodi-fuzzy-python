@@ -70,6 +70,8 @@ def main():
     Optional third parameter is a ratio from 0-100 on how close a fuzzy match will be:
     "Show Name" "Episode Description" 85
     """
+
+    epName = sys.argv[2].decode('utf-8')
     if len(sys.argv) < 3:
         logging.error("ERROR: Too few arguments. Expected at least 2, got %d",len(sys.argv)-1)
         sys.exit(1)
@@ -82,10 +84,10 @@ def main():
         except:
             logging.error("ERROR: Expected third argument to be a number but it was %s",sys.argv[3])
             sys.exit(1)
-        print(findEpisodeData(sys.argv[1], sys.argv[2], ratio))
+        print(findEpisodeData(sys.argv[1], epName, ratio))
         sys.exit(0)
     if len(sys.argv) == 0:
-        print(findEpisodeData(sys.argv[1], sys.argv[2]))
+        print(findEpisodeData(sys.argv[1], epName))
         sys.exit(0)
     sys.exit(1)
 
