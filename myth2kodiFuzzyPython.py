@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 #pip install tvdb_api
 #pip install fuzzywuzzy
@@ -30,7 +30,8 @@ def fuzzyMatch(title,subtitle,show,minRatio):
     seasons = sorted(show.keys(),reverse=True)
     for season in seasons:
         for ep in show[season].keys():
-            ratio = fuzz.ratio(show[season][ep]['episodeName'],subtitle)
+            ratio = fuzz.partial_ratio(show[season][ep]['episodeName'],subtitle.decode("utf-8"))
+            print(ratio)
             if ratio > 85:
                 return(season,ep,ratio)
     return None
@@ -47,10 +48,10 @@ def findEpisodeData(showTitle,epTitle,fuzzyRatio=95):
     filenamePreamble = showTitle.replace(' ','_')
 
     logging.info("Trying exact match...")
-    showdata = exactMatch(testTitle,testSubtitle,show)
+    showdata = exactMatch(testTitle,epTitle,show)
     if showdata == None:
         logging.info("No exact match found. Trying fuzzy match...")
-        showdata = fuzzyMatch(testTitle,testSubtitle,show,fuzzyRatio)
+        showdata = fuzzyMatch(testTitle,epTitle,show,fuzzyRatio)
         if showdata == None:
             logging.info("No subtitle match could be found. Exiting.")
             return 0
