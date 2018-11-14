@@ -37,11 +37,15 @@ def getDbObject(credentials=getCredentials(mythConfig)):
                        ('DBPassword',credentials[3])))
     return dbObj
 
+def getBeObject(databaseObj=getDbObject()):
+    return MythBE(db=databaseObj)
+
 def getProgramObjectFromFilename(basename,dbObj,beObj):
     """
     Returns a MythTV program object (type is MythTV.mythproto.Program)
     Seem convoluted to have to search for it in this way... FIXME: better search?
     """
+    basename = os.path.split(basename)[-1]
     showInfoGen = dbObj.searchRecorded(basename=basename)
     showInfo = next(showInfoGen,None)
     if showInfo == None:
@@ -56,8 +60,10 @@ def deleteProgram(basename):
     Delete the recording with filename==basename
     This deletes the physical file as well as the MythTV database entries
     """
+
+    basename = os.path.split(basename)[-1]
     db1 = getDbObject()
-    be1 = MythBE(db=db1)
+    be1 = getBeObject(db1)
 
     showObject = getProgramObjectFromFilename(basename,db1,be1)
 
