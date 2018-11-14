@@ -11,9 +11,6 @@ import sys
 from operator import itemgetter
 from mythPythonBindings import getProgramObjectFromFilename, getDbObject, getBeObject
 
-
-logging.basicConfig(filename='myth2kodiFuzzyPython.log',format='%(asctime)s %(message)s',level=logging.INFO)
-
 myth2kodiFuzzyPython_apikey ='0E2AC500-E296-4756-BE20-6B5D192622E6'
 
 #Test Values

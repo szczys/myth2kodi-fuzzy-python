@@ -1,1 +1,26 @@
 # myth2kodi-fuzzy-python
+
+This Program will match recordings from MythTV to entries in thetvdb.com for accurate cataloging with Kodi/Plex/Etc.
+
+Matching priority happens in this order:
+- Episode title will try to be matched exactly with tvdb information
+- Episode air date will be used to then fuzzy-match the episode title
+- General fuzzy match will be performed on the episode title and all series episodes from tvdb
+
+## Usage
+
+To identify a recording and move it to your library, pass findAndMove.py the filename, show title, and episode title.
+
+Run as a User Job from MythTV:
+```
+/usr/bin/python /home/mythtv/myth2kodi-fuzzy-python/findAndMove.py "%FILE%" "%TITLE%" "%SUBTITLE%"
+```
+
+You must set the following values:
+
+- Directory where recordings are stored is `recordingDir` in findAndMove.py
+- Library directory for storing TV shows i `storageDir` in findAndMove.py
+- MythTV db credential xml file is `mythConfig` in mythPythonBindings.py
+
+
+
