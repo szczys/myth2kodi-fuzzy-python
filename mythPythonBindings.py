@@ -1,6 +1,8 @@
 from MythTV import MythDB
 from MythTV import MythBE
 
+from fuzzy_logger import logging
+
 mythConfig = '/home/mythtv/.mythtv/config.xml'
 #mythConfig = '/home/mike/mythtv.xml'
 
@@ -34,20 +36,35 @@ def getDbObject(credentials=getCredentials(mythConfig)):
                        ('DBUserName',credentials[2]),
                        ('DBPassword',credentials[3])))
     return dbObj
+
+def getProgramObjectFromFilename(basename,dbObj,beObj):
+    """
+    Returns a MythTV program object (type is MythTV.mythproto.Program)
+    Seem convoluted to have to search for it in this way... FIXME: better search?
+    """
+    showInfoGen = dbObj.searchRecorded(basename=basename)
+    showInfo = next(showInfoGen,None)
+    if showInfo == None:
+        return None
+    chanid = showInfo['chanid']
+    starttime = showInfo['starttime']
+    showObject = beObj.getRecording(chanid,starttime)
+    return showObject
     
 def deleteProgram(basename):
     """
     Delete the recording with filename==basename
     This deletes the physical file as well as the MythTV database entries
     """
-
-    db1 = getDbObject
+    db1 = getDbObject()
     be1 = MythBE(db=db1)
 
-    showInfoGen = db1.searchRecorded(basename=basename)
-    showInfo = next(showInfoGen)
-    showObject = be1.getRecording(y['chanid'],y['starttime'])
+    showObject = getProgramObjectFromFilename(basename,db1,be1)
 
-    deletedShow = be1.deleteRecording(z,force=True) #Return -1 means success
+    logging.info("Deleting program: %s :: %s (filename %s)", showObject['title'], showObject['subtitle'], basename)
+    deletedShow = be1.deleteRecording(showObject,force=True) #Return -1 means success
+    if deletedShow == -1:
+        logging.info("Successfully deleted program")
+        
 
 
