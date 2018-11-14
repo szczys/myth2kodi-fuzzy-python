@@ -9,6 +9,7 @@ from fuzzywuzzy import process
 from fuzzy_logger import logging
 import sys
 from operator import itemgetter
+from mythPythonBindings import getProgramObjectFromFilename, getDbObject, getBeObject
 
 
 logging.basicConfig(filename='myth2kodiFuzzyPython.log',format='%(asctime)s %(message)s',level=logging.INFO)
@@ -25,6 +26,44 @@ def exactMatch(title,subtitle,show):
         for ep in show[season].keys():
             if show[season][ep]['episodeName'] == subtitle:
                 return(season,ep)
+    return None
+
+def searchByDate(showTitle,datestring):
+    """
+    Search theTvDb data structure for original air date
+    Return show information object if found, None if not
+    """
+    thisShow = getShow(showTitle)
+    foundShows = list()
+    for season in thisShow.keys():
+        for episode in thisShow[season].keys():
+                if thisShow[season][episode]['firstAired'] == datestring:
+                        logging.info("Found: %s",thisShow[season][episode]['episodeName'])
+                        foundShows.append(thisShow[season][episode])
+    return foundShows
+			
+    
+def airdateFuzzyMatch(filename):
+    """
+    Compares airdate and fuzzy-matched title for identifying episodes
+    
+    When exactMatch doesn't work, this should be run before falling back to pure fuzzyMatch
+    Consider 'Wheel of Fortune' -- episcodeNames will be "Weekly Theme 1", "Weekly Theme 2", etc.
+    Trying to fuzzy match these will be difficult as only 1 character is different
+    A better way is checking the airdate, and fuzzy matching to the title. Hits on both are adequate.
+    """
+    #Use MythTV Python Bindings to get show, episode, and airdate
+    targetProgram = getProgramObjectFromFilename(filename, getDbObject(), getBeObject())
+    if targetProgram == None:
+        return None
+    return targetProgram
+    #Get thetvdb.com data structure for complete series
+    showTitle = targetProgram['title']
+    show = getShow(showTitle)
+    #tvdb: was there an episode on our target airdate?
+    
+    #tvdb: do we have a high confience fuzzy match with the episodeName on that airdate?
+    #return season, ep, and ratio, otherwise return None as we only care about that airdate
     return None
 
 def fuzzyMatch(title,subtitle,show,minRatio):
