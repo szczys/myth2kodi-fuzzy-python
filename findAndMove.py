@@ -14,7 +14,7 @@ def main():
     recordingFile = sys.argv[1]
     showName = sys.argv[2].decode('utf-8')
     epName = sys.argv[3].decode('utf-8')
-    epFilename = findEpisodeFilename(showName,epName)
+    epFilename = findEpisodeFilename(showName,epName,recordingFilename=recordingFile)
     if epFilename != "0":
         if os.path.isdir(storageDir) == False:
             logging.info("storageDir doesn't exist, aborting.")
