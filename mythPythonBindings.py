@@ -2,6 +2,7 @@ from MythTV import MythDB
 from MythTV import MythBE
 
 from fuzzy_logger import logging
+import os
 
 mythConfig = '/home/mythtv/.mythtv/config.xml'
 #mythConfig = '/home/mike/mythtv.xml'
