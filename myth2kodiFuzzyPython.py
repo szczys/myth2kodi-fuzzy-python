@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import tvdb_api
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
-import logging
+from fuzzy_logger import logging
 import sys
 from operator import itemgetter
 
@@ -62,14 +62,14 @@ def findEpisodeFilename(showTitle,epTitle,fuzzyRatio=85):
     logging.info("Trying exact match...")
     exactEpisode = exactMatch(testTitle,epTitle,show)
     if exactEpisode != None:
-        logging.info("Exact match! Season: %d Episode: %d", showdata[0], showdata[1])
-        return filenamePreamble + "-S" + str(showdata[0]) + "E" + str(showdata[1])
+        logging.info("Exact match! Season: %d Episode: %d", exactEpisode[0], exactEpisode[1])
+        return filenamePreamble + "-S" + str(exactEpisode[0]) + "E" + str(exactEpisode[1])
     
     logging.info("No exact match found. Trying fuzzy match...")
     fuzzyEpisode = fuzzyMatch(testTitle,epTitle,show,fuzzyRatio)
-    if showdata != None:
-        logging.info("Fuzzy match ratio: %d Season: %d Episode: %d", showdata[2], showdata[0], showdata[1])
-        return filenamePreamble + "-S" + str(showdata[0]) + "E" + str(showdata[1])
+    if fuzzyEpisode != None:
+        logging.info("Fuzzy match ratio: %d Season: %d Episode: %d", fuzzyEpisode[2], fuzzyEpisode[0], fuzzyEpisode[1])
+        return filenamePreamble + "-S" + str(fuzzyEpisode[0]) + "E" + str(fuzzyEpisode[1])
 
     logging.info("No subtitle match could be found. Exiting.")
     return 0
