@@ -33,17 +33,18 @@ def searchByDate(showTitle,datestring):
     Search theTvDb data structure for original air date
     Return show information object if found, None if not
     """
-    thisShow = getShow(showTitle)
+    showInfo = getShow(str(showTitle))
+    print(showInfo)
     foundShows = list()
-    for season in thisShow.keys():
-        for episode in thisShow[season].keys():
-                if thisShow[season][episode]['firstAired'] == datestring:
-                        logging.info("Found: %s",thisShow[season][episode]['episodeName'])
-                        foundShows.append(thisShow[season][episode])
+    for season in showInfo.keys():
+        for episode in showInfo[season].keys():
+                if showInfo[season][episode]['firstAired'] == datestring:
+                        logging.info("Found: %s",showInfo[season][episode]['episodeName'])
+                        foundShows.append(showInfo[season][episode])        
     return foundShows
 			
     
-def airdateFuzzyMatch(filename):
+def airdateFuzzyMatch(filename, minRatio=85):
     """
     Compares airdate and fuzzy-matched title for identifying episodes
     
@@ -56,22 +57,42 @@ def airdateFuzzyMatch(filename):
     targetProgram = getProgramObjectFromFilename(filename, getDbObject(), getBeObject())
     if targetProgram == None:
         return None
-    return targetProgram
     #Get thetvdb.com data structure for complete series
     showTitle = targetProgram['title']
-    show = getShow(showTitle)
+    airdate = targetProgram['airdate'].strftime("%Y-%m-%d")
+    epTitle = targetProgram['subtitle']
+    #show = getShow(showTitle)
     #tvdb: was there an episode on our target airdate?
-    
+    tvdbShows = searchByDate(showTitle,airdate)
+    if len(tvdbShows) == 0:
+        return None
     #tvdb: do we have a high confience fuzzy match with the episodeName on that airdate?
+    fuzzyMatch = [0,None]
+    for show in tvdbShows:
+        showRatio = fuzzyScore(show['episodeName'],epTitle)
+        if showRatio > fuzzyMatch[0]:
+            fuzzyMatch[0] = showRatio
+            fuzzyMatch[1] = show
     #return season, ep, and ratio, otherwise return None as we only care about that airdate
-    return None
+    if fuzzyMatch[0] >= minRatio:
+        epName = fuzzyMatch[1]['episodeName']
+        season = fuzzyMatch[1]['airedSeason']
+        episode = fuzzyMatch[1]['airedEpisodeNumber']
+        logging.info("Fuzzy matched on airdate: %s :: Season %s Episode %s :: %s",showTitle,season,episode,epName)
+                     
+        return [season, episode, fuzzyMatch[0]]
+    else:
+        return None
 
+def fuzzyScore(string1, string2):
+    return fuzz.partial_ratio(string1,string2
+                              )
 def fuzzyMatch(title,subtitle,show,minRatio):
     found = list()
     seasons = sorted(show.keys(),reverse=True)
     for season in seasons:
         for ep in show[season].keys():
-            ratio = fuzz.partial_ratio(show[season][ep]['episodeName'],subtitle.decode("utf-8"))
+            ratio = fuzzyscore(show[season][ep]['episodeName'],subtitle.decode("utf-8"))
             #print(ratio)
             if ratio > minRatio:
                 found.append((season,ep,ratio))
@@ -86,6 +107,7 @@ def fuzzyMatch(title,subtitle,show,minRatio):
 def getShow(showTitle):
     t = tvdb_api.Tvdb(apikey=myth2kodiFuzzyPython_apikey)
     try:
+        print(showTitle)
         show = t[showTitle]
         return show
     except Exception as e:
@@ -142,5 +164,7 @@ def main():
         sys.exit(0)
     sys.exit(1)
 
+"""
 if __name__ == '__main__':
         main()
+"""
