@@ -34,7 +34,6 @@ def searchByDate(showTitle,datestring):
     Return show information object if found, None if not
     """
     showInfo = getShow(str(showTitle))
-    print(showInfo)
     foundShows = list()
     for season in showInfo.keys():
         for episode in showInfo[season].keys():
@@ -92,7 +91,7 @@ def fuzzyMatch(title,subtitle,show,minRatio):
     seasons = sorted(show.keys(),reverse=True)
     for season in seasons:
         for ep in show[season].keys():
-            ratio = fuzzyscore(show[season][ep]['episodeName'],subtitle.decode("utf-8"))
+            ratio = fuzzyScore(show[season][ep]['episodeName'],subtitle.decode("utf-8"))
             #print(ratio)
             if ratio > minRatio:
                 found.append((season,ep,ratio))
@@ -107,14 +106,13 @@ def fuzzyMatch(title,subtitle,show,minRatio):
 def getShow(showTitle):
     t = tvdb_api.Tvdb(apikey=myth2kodiFuzzyPython_apikey)
     try:
-        print(showTitle)
         show = t[showTitle]
         return show
     except Exception as e:
         logging.exception("API Error: %s",type(e).__name__)
         return None    
 
-def findEpisodeFilename(showTitle,epTitle,fuzzyRatio=85):
+def findEpisodeFilename(showTitle,epTitle,fuzzyRatio=85,recordingFilename=None):
     #Get DB info
     show = getShow(showTitle)
 
@@ -125,8 +123,17 @@ def findEpisodeFilename(showTitle,epTitle,fuzzyRatio=85):
     if exactEpisode != None:
         logging.info("Exact match! Season: %d Episode: %d", exactEpisode[0], exactEpisode[1])
         return filenamePreamble + "-S" + str(exactEpisode[0]) + "E" + str(exactEpisode[1])
-    
-    logging.info("No exact match found. Trying fuzzy match...")
+    logging.info("No exact match found.")
+
+    if (recordingFilename != None):
+        logging.info("Trying fuzzy match based on air date...")
+        fuzzyDate = airdateFuzzyMatch(recordingFilename,fuzzyRatio)
+        if fuzzyDate != None:
+            logging.info("Fuzzy matched with air date! Season: %d Episode: %d", fuzzyDate[0], fuzzyDate[1])
+            return filenamePreamble + "-S" + str(fuzzyDate[0]) + "E" + str(fuzzyDate[1])
+    logging.info("No fuzzy match based on air date.")
+
+    logging.info("Trying generic fuzzy match of episode name.")
     fuzzyEpisode = fuzzyMatch(testTitle,epTitle,show,fuzzyRatio)
     if fuzzyEpisode != None:
         logging.info("Fuzzy match ratio: %d Season: %d Episode: %d", fuzzyEpisode[2], fuzzyEpisode[0], fuzzyEpisode[1])
