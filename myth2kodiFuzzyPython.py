@@ -81,19 +81,23 @@ def airdateFuzzyMatch(filename, minRatio=85):
         return None
 
 def fuzzyScore(string1, string2):
-    return fuzz.partial_ratio(string1,string2
+    #return fuzz.partial_ratio(string1,string2
+    return fuzz.partial_token_set_ratio(string1,string2
                               )
 def fuzzyMatch(title,subtitle,show,minRatio):
     found = list()
     seasons = sorted(show.keys(),reverse=True)
+    bestRatio = 0
     for season in seasons:
         for ep in show[season].keys():
             ratio = fuzzyScore(show[season][ep]['episodeName'],subtitle.decode("utf-8"))
+            if ratio > bestRatio:
+                bestRatio = ratio
             #print(ratio)
             if ratio > minRatio:
                 found.append((season,ep,ratio))
-                #print(found[-1])
     if len(found) == 0:
+        logging.info("fuzzyMatch found a ratio of %d, but that's below the minimum of %d.",bestRatio,minRatio)
         return None
     else:
         topIdx = max(enumerate(map(itemgetter(-1), found)),key=itemgetter(1))[0]
