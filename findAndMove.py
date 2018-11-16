@@ -14,13 +14,12 @@ def main():
     recordingFile = sys.argv[1]
     showName = sys.argv[2].decode('utf-8')
     epName = sys.argv[3].decode('utf-8')
+    logging.info("======================")
+    logging.info("Attempting tvdb match to: %s :: %s :: %s", recordingFile, showName, epName)
     seriesName = getSeriesName(showName) #Use tvdb series name value for directory names to normalize capitalization
     if seriesName == None:
         logging.info("Couldn't retrieve series name from tvdb. Aborting.")
-        sys.exit(1)
-    print(seriesName)
-    sys.exit(0)
-    
+        sys.exit(1)    
     epFilename = findEpisodeFilename(seriesName,epName,recordingFilename=recordingFile)
     if epFilename != 0:
         if os.path.isdir(storageDir) == False:
