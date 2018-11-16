@@ -111,7 +111,14 @@ def getShow(showTitle):
         return show
     except Exception as e:
         logging.exception("API Error: %s",type(e).__name__)
-        return None    
+        return None
+
+def getSeriesName(showTitle):
+    show = getShow(showTitle)
+    if type(show) == tvdb_api.Show:
+        return show.data['seriesName']
+    else:
+        return None
 
 def findEpisodeFilename(showTitle,epTitle,fuzzyRatio=85,recordingFilename=None):
     #Get DB info
