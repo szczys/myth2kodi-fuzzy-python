@@ -21,7 +21,7 @@ def main():
     logging.info("Attempting to move to showings: %s", recordingFile)
 
     episodeObj = getProgramObjectFromFilename(recordingFile,getDbObject(), getBeObject())
-    newFilename = "%s-S%dE%d-%s-%s___%s.ts" % (episodeObj['title'], episodeObj['season'], episodeObj['episode'], episodeObj['subtitle'], str(episodeObj['airdate']), str(episodeObj['starttime']).replace(' ','_'))
+    newFilename = "%s-%s-%s-%s___%s.ts" % (episodeObj['title'], str(episodeObj['syndicatedepisode']), episodeObj['subtitle'], str(episodeObj['airdate']), str(episodeObj['starttime']).replace(' ','_'))
  
     if os.path.isdir(storageDir) == False:
         logging.info("storageDir doesn't exist, aborting: %s", storageDir)
