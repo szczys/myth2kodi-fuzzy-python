@@ -39,7 +39,7 @@ def main():
     os.chmod(fileDestination,0o777)
     logging.info("File copied successfully")
     logging.info("Deleting %s",recordingFile)
-    #deleteProgram(recordingFile)
+    deleteProgram(recordingFile)
     logging.info("Operation complete. Exiting.")
     sys.exit(0)
 
