@@ -20,7 +20,7 @@ def main():
     logging.info("======================")
     logging.info("Attempting to move to showings: %s", recordingFile)
 
-    episodeObj = getProgramObjectFromFilename('1214_20190912150000.ts',getDbObject(), getBeObject())
+    episodeObj = getProgramObjectFromFilename(recordingFile,getDbObject(), getBeObject())
     newFilename = "%s-S%dE%d-%s-%s___%s.ts" % (episodeObj['title'], episodeObj['season'], episodeObj['episode'], episodeObj['subtitle'], str(episodeObj['airdate']), str(episodeObj['starttime']).replace(' ','_'))
  
     if os.path.isdir(storageDir) == False:
