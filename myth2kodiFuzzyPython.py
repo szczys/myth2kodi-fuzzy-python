@@ -8,8 +8,10 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from fuzzy_logger import logging
 import sys
+import os
 from operator import itemgetter
-from mythPythonBindings import getProgramObjectFromFilename, getDbObject, getBeObject
+import pickle
+#from mythPythonBindings import getProgramObjectFromFilename, getDbObject, getBeObject
 
 myth2kodiFuzzyPython_apikey ='0E2AC500-E296-4756-BE20-6B5D192622E6'
 
@@ -50,9 +52,17 @@ def airdateFuzzyMatch(filename, minRatio=85):
     A better way is checking the airdate, and fuzzy matching to the title. Hits on both are adequate.
     """
     #Use MythTV Python Bindings to get show, episode, and airdate
+    '''
     targetProgram = getProgramObjectFromFilename(filename, getDbObject(), getBeObject())
     if targetProgram == None:
         return None
+    '''
+    systemCmd = "/usr/bin/python3 mythObjGetter.py " + filename
+    showGetterCode = os.system(systemCmd)
+    if (showGetterCode != 0):
+        return None
+    targetProgram = pickle.load(open("showObj.p","rb"))
+    print(targetProgram)
     #Get thetvdb.com data structure for complete series
     showTitle = targetProgram['title']
     airdate = targetProgram['airdate'].strftime("%Y-%m-%d")

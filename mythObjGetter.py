@@ -19,7 +19,7 @@ def main():
     if targetProgram == None:
         sys.exit(1)
     else:
-        pickle.dump(returnObj, open("showObj.p","wb"))
+        pickle.dump(returnObj, open("showObj.p","wb"), protocol=2)
         sys.exit(0)
 
 if __name__ == '__main__':
