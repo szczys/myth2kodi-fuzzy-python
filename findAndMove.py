@@ -12,8 +12,8 @@ storageDir = "/Lenny/videoLibrary/TV/"
 
 def main():
     recordingFile = sys.argv[1]
-    showName = sys.argv[2].decode('utf-8')
-    epName = sys.argv[3].decode('utf-8')
+    showName = sys.argv[2]
+    epName = sys.argv[3]
     logging.info("======================")
     logging.info("Attempting tvdb match to: %s :: %s :: %s", recordingFile, showName, epName)
     seriesName = getSeriesName(showName) #Use tvdb series name value for directory names to normalize capitalization
@@ -27,7 +27,7 @@ def main():
             sys.exit(1)
         if os.path.isdir(os.path.join(storageDir,seriesName)) == False:
             logging.info("making directory for this show: %s",os.path.join(storageDir,seriesName))
-            os.mkdir(os.path.join(storageDir,seriesName),0777)
+            os.mkdir(os.path.join(storageDir,seriesName),0o0777)
             os.chmod(os.path.join(storageDir,seriesName),0o777)
         fileDestination = os.path.join(storageDir,seriesName,epFilename+os.path.splitext(recordingFile)[-1])
         if os.path.exists(fileDestination):

@@ -147,7 +147,7 @@ def findEpisodeFilename(showTitle,epTitle,fuzzyRatio=85,recordingFilename=None):
 
     if (recordingFilename != None):
         logging.info("Trying fuzzy match based on air date...")
-        fuzzyDate = airdateFuzzyMatch(recordingFilename,fuzzyRatio)
+        fuzzyDate = airdateFuzzyMatch(recordingFilename,min(70,fuzzyRatio))
         if fuzzyDate != None:
             logging.info("Fuzzy matched with air date! Season: %d Episode: %d", fuzzyDate[0], fuzzyDate[1])
             return filenamePreamble + "-S" + str(fuzzyDate[0]) + "E" + str(fuzzyDate[1])
