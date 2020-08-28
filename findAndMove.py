@@ -1,11 +1,12 @@
 from __future__ import print_function
 
 from myth2kodiFuzzyPython import findEpisodeFilename, getSeriesName
-import sys
 import os
+import sys
+import subprocess
 from shutil import copyfile
 from fuzzy_logger import logging
-from mythPythonBindings import deleteProgram
+#from mythPythonBindings import deleteProgram
 
 recordingDir = "/Lenny/mythtv/"
 storageDir = "/Lenny/videoLibrary/TV/"
@@ -28,7 +29,7 @@ def main():
         if os.path.isdir(os.path.join(storageDir,seriesName)) == False:
             logging.info("making directory for this show: %s",os.path.join(storageDir,seriesName))
             os.mkdir(os.path.join(storageDir,seriesName),0o0777)
-            os.chmod(os.path.join(storageDir,seriesName),0o777)
+            os.chmod(os.path.join(storageDir,seriesName),0o0777)
         fileDestination = os.path.join(storageDir,seriesName,epFilename+os.path.splitext(recordingFile)[-1])
         if os.path.exists(fileDestination):
             logging.error("ERROR: aborting, file already exists at: %s", fileDestination)
@@ -38,7 +39,11 @@ def main():
         os.chmod(fileDestination,0o777)
         logging.info("File copied successfully")
         logging.info("Deleting %s",recordingFile)
-        deleteProgram(recordingFile)
+        mythDeleteCode = subprocess.call(["/usr/bin/python3", "mythObjGetter.py", recordingFile, "DELETE"]) 
+        if (mythDeleteCode != 0):
+            logging.info("Error: Unable to delete from mythv: %s | exit code: %d", recordingFile, mythDeleteCode)
+            logging.info(systemCmd)
+            sys.exit(1)
         logging.info("Operation complete. Exiting.")
         sys.exit(0)
     sys.exit(1)
