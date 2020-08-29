@@ -90,6 +90,10 @@ def airdateFuzzyMatch(filename, minRatio=85):
     else:
         return None
 
+def deleteShow(filename):
+    systemCmd = "/usr/bin/python3 mythObjGetter.py " + filename + " DELETE"
+    os.system(systemCmd)
+
 def fuzzyScore(string1, string2):
     #return fuzz.partial_ratio(string1,string2)
     return fuzz.token_set_ratio(string1,string2)

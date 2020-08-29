@@ -61,12 +61,16 @@ def deleteProgram(basename):
     Delete the recording with filename==basename
     This deletes the physical file as well as the MythTV database entries
     """
-
+    
     basename = os.path.split(basename)[-1]
+    logging.info("Attempting to delete from mythtv: %s", basename)
     db1 = getDbObject()
     be1 = getBeObject(db1)
 
     showObject = getProgramObjectFromFilename(basename,db1,be1)
+    if showObject == None:
+        logging.info("Cannot delete show: Unable to get show object from mythtv: %s", basename)
+        return
 
     logging.info("Deleting program: %s :: %s (filename %s)", showObject['title'], showObject['subtitle'], basename)
     deletedShow = be1.deleteRecording(showObject,force=True) #Return -1 means success
