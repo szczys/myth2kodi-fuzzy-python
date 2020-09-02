@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 #from myth2kodiFuzzyPython import findEpisodeFilename, getSeriesName
-from fuzzy_scraper import identifyMythtvEpisode
+from fuzzy_scraper import identifyMythtvEpisode, deleteMythRecording
 import os
 import sys
 import subprocess
@@ -43,20 +43,15 @@ def main():
         copyfile(os.path.join(recordingDir,recordingFile),fileDestination)
         os.chmod(fileDestination,0o777)
         logging.info("File copied successfully")
-        logging.info("Writing filename for deletion by cron job")
-        with open(workingDir + todelete, 'a') as f:
-            f.write(recordingFile + '\n')
-        os.chmod(workingDir + todelete,0o777)
-        '''
+##        logging.info("Writing filename for deletion by cron job")
+##        with open(workingDir + todelete, 'a') as f:
+##            f.write(recordingFile + '\n')
+##        os.chmod(workingDir + todelete,0o777)
+
         logging.info("Deleting %s",recordingFile)
-        systemCmd = '/usr/bin/python3 mythObjGetter.py ' + sys.argv[1] + ' DELETE'
-        mythDeleteCode = os.system(systemCmd) 
-        if (mythDeleteCode != 0):
-            logging.info("Error: Unable to delete from mythv: %s | exit code: %d", recordingFile, mythDeleteCode)
-            logging.info(systemCmd)
-            sys.exit(1)
+        deleteMythRecording(recordingFile)
         logging.info("Operation complete. Exiting.")
-        '''
+
         sys.exit(0)
     sys.exit(1)
 

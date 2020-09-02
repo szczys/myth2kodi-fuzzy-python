@@ -50,6 +50,9 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     logging.info("No episode match could be found. Exiting.")
     return 0
 
+def deleteMythRecording(basename):
+    deleteProgram(basename)
+
 def exactMatch(show, subtitle):
     for ep in reversed(show.episodes):
         if ep.episodeName == subtitle:
