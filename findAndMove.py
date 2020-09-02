@@ -1,6 +1,7 @@
 from __future__ import print_function
 
-from myth2kodiFuzzyPython import findEpisodeFilename, getSeriesName, deleteShow
+#from myth2kodiFuzzyPython import findEpisodeFilename, getSeriesName
+from fuzzy_scraper import identifyMythtvEpisode
 import os
 import sys
 import subprocess
@@ -21,20 +22,20 @@ def main():
     epName = sys.argv[3]
     logging.info("======================")
     logging.info("Attempting tvdb match to: %s :: %s :: %s", recordingFile, showName, epName)
-    seriesName = getSeriesName(showName) #Use tvdb series name value for directory names to normalize capitalization
-    if seriesName == None:
-        logging.info("Couldn't retrieve series name from tvdb. Aborting.")
-        sys.exit(1)    
-    epFilename = findEpisodeFilename(seriesName,epName,recordingFilename=recordingFile)
-    if epFilename != 0:
+##    seriesName = getSeriesName(showName) #Use tvdb series name value for directory names to normalize capitalization
+##    if seriesName == None:
+##        logging.info("Couldn't retrieve series name from tvdb. Aborting.")
+##        sys.exit(1)    
+    matchedEpisode = identifyMythtvEpisode(recordingFilename=recordingFile)
+    if matchedEpisode != None:
         if os.path.isdir(storageDir) == False:
             logging.info("storageDir doesn't exist, aborting.")
             sys.exit(1)
-        if os.path.isdir(os.path.join(storageDir,seriesName)) == False:
-            logging.info("making directory for this show: %s",os.path.join(storageDir,seriesName))
+        if os.path.isdir(os.path.join(storageDir,matchedEpisode.seriestitle)) == False:
+            logging.info("making directory for this show: %s",os.path.join(storageDir,matchedEpisode.seriestitle))
             os.mkdir(os.path.join(storageDir,seriesName),0o0777)
             os.chmod(os.path.join(storageDir,seriesName),0o0777)
-        fileDestination = os.path.join(storageDir,seriesName,epFilename+os.path.splitext(recordingFile)[-1])
+        fileDestination = os.path.join(storageDir,matchedEpisode.seriestitle,matchedEpisode.filename+os.path.splitext(recordingFile)[-1])
         if os.path.exists(fileDestination):
             logging.error("ERROR: aborting, file already exists at: %s", fileDestination)
             sys.exit(1)
@@ -45,7 +46,7 @@ def main():
         logging.info("Writing filename for deletion by cron job")
         with open(workingDir + todelete, 'a') as f:
             f.write(recordingFile + '\n')
-	os.chmod(workingDir + todelete,0o777)
+        os.chmod(workingDir + todelete,0o777)
         '''
         logging.info("Deleting %s",recordingFile)
         systemCmd = '/usr/bin/python3 mythObjGetter.py ' + sys.argv[1] + ' DELETE'
