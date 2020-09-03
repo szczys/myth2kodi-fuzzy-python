@@ -17,7 +17,7 @@ To identify a recording and move it to your library, pass findAndMove.py the fil
 
 Run as a User Job from MythTV:
 ```
-/usr/bin/python2 /home/mythtv/myth2kodi-fuzzy-python/findAndMove.py "%FILE%"
+/usr/bin/python3 /home/mythtv/myth2kodi-fuzzy-python/findAndMove.py "%FILE%"
 ```
 
 You must set the following values:

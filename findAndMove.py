@@ -10,7 +10,7 @@ storageDir = "/Lenny/videoLibrary/TV/"
 def main():
     recordingFile = sys.argv[1]
     logging.info("======================")
-    logging.info("Attempting tvdb match to: %s :: %s :: %s", recordingFile)
+    logging.info("Attempting tvdb match to: %s", recordingFile)
     matchedEpisode = identifyMythtvEpisode(recordingFilename=recordingFile)
     if matchedEpisode != None:
         if os.path.isdir(storageDir) == False:

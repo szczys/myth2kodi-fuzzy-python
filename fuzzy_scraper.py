@@ -42,7 +42,7 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     logging.info("Trying fuzzy match of episode name.")
     fuzzyEpisode = fuzzyMatch(show,targetProgram['subtitle'],fuzzyRatio,targetProgram['airdate'])
     if fuzzyEpisode != None:
-        logging.info("Fuzzy match ratio: %s", fuzzyEpisode.epNum)
+        logging.info("Fuzzyr match ratio: %s", fuzzyEpisode.epNum)
         fuzzyEpisode.filename = filenamePreamble + fuzzyEpisode.epNum
         fuzzyEpisode.seriestitle = show.title
         return fuzzyEpisode
@@ -100,7 +100,7 @@ def fuzzyMatch(show,subtitle,minRatio,airdateObj=None):
             if result[-1] == topIdxRatio[1]:
                 sameScore.append(result)
         if len(sameScore) == 1:
-            return sameScore[0]
+            return sameScore[0][0]
         else:
             logging.info("Multiple matches with ratio of %d found!",topIdxRatio[1])
             logging.info("Source information: %s :: %s", show.title, subtitle)
