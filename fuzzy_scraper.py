@@ -17,19 +17,10 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     targetProgram = getProgramObjectFromFilename(recordingFilename, getDbObject(), getBeObject())
 
     #If MythTV metadata is enabled the season and episode may already be known
+    episode = getEpNum_mythtv(targetProgram)
     logging.info("Checking MythTV for Season/Episode Numbers")
-    if targetProgram['season'] != None and targetProgram['episode'] != None:
-        seasonEpisode = 'S' + str(targetProgram['season']) + 'E' + str(targetProgram['episode'])
-        logging.info("Episode Found: %s" % seasonEpisode)
-        ep = Episode()
-        ep.epNum = seasonEpisode
-        ep.episodeName = targetProgram['subtitle']
-        ep.description = targetProgram['description']
-        filenameIsSet = ep.setSeriesAndFilename(targetProgram['title'])
-        if filenameIsSet:
-            return ep
-        else:
-            logging.info("Error: failed to set filename from MythTV season/episode data")
+    if episode != None:
+        return episode
     else:
         logging.info("Can't find season and episode numbers from MythTV")
 
@@ -37,8 +28,7 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     logging.info("Loading show info from tvdb: %s", targetProgram['title'])
     show = getShow(targetProgram['title'])
 
-    filenamePreamble = show.title.replace(' ','_')
-
+    #Try exact expisode title match
     logging.info("Trying exact match...")
     exactEpisode = exactMatch(show,targetProgram['subtitle'])
     if exactEpisode != None:
@@ -62,6 +52,21 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
 
     logging.info("No episode match could be found. Exiting.")
     return 0
+
+def getEpNum_mythtv(targetProgram):
+    if targetProgram['season'] != None and targetProgram['episode'] != None:
+        seasonEpisode = 'S' + str(targetProgram['season']) + 'E' + str(targetProgram['episode'])
+        logging.info("Episode Found: %s" % seasonEpisode)
+        ep = Episode()
+        ep.epNum = seasonEpisode
+        ep.episodeName = targetProgram['subtitle']
+        ep.description = targetProgram['description']
+        filenameIsSet = ep.setSeriesAndFilename(targetProgram['title'])
+        if filenameIsSet:
+            return ep
+        else:
+            logging.info("Error: failed to set filename from MythTV season/episode data"
+    return None
 
 def deleteMythRecording(basename):
     deleteProgram(basename)
