@@ -25,8 +25,11 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
         ep.epNum = seasonEpisode
         ep.episodeName = targetProgram['subtitle']
         ep.description = targetProgram['description']
-        ep.setSeriesAndFilename(targetProgram['title'])
-        return ep
+        filenameIsSet = ep.setSeriesAndFilename(targetProgram['title'])
+        if filenameIsSet:
+            return ep
+        else:
+            logging.info("Error: failed to set filename from MythTV season/episode data")
     else:
         logging.info("Can't find season and episode numbers from MythTV")
 
@@ -40,24 +43,22 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     exactEpisode = exactMatch(show,targetProgram['subtitle'])
     if exactEpisode != None:
         logging.info("Exact match! %s", exactEpisode.epNum)
-        exactEpisode.setSeriesAndFilename(show.title)
-        return exactEpisode
+        filenameIsSet = exactEpisode.setSeriesAndFilename(show.title)
+        if filenameIsSet:
+            return exactEpisode
+        else:
+            logging.info("Error: failed to set filename from exact match data")
     logging.info("No exact match found.")
-
-##    if (recordingFilename != None):
-##        logging.info("Trying fuzzy match based on air date...")
-##        fuzzyDate = airdateFuzzyMatch(recordingFilename,min(70,fuzzyRatio))
-##        if fuzzyDate != None:
-##            logging.info("Fuzzy matched with air date! Season: %d Episode: %d", fuzzyDate[0], fuzzyDate[1])
-##            return filenamePreamble + "-S" + str(fuzzyDate[0]) + "E" + str(fuzzyDate[1])
-##    logging.info("No fuzzy match based on air date.")
 
     logging.info("Trying fuzzy match of episode name.")
     fuzzyEpisode = fuzzyMatch(show,targetProgram['subtitle'],fuzzyRatio,targetProgram['airdate'])
     if fuzzyEpisode != None:
         logging.info("Fuzzy match ratio: %s", fuzzyEpisode.epNum)
-        fuzzyEpisode.setSeriesAndFilename(show.title)
-        return fuzzyEpisode
+        filenameIsSet = fuzzyEpisode.setSeriesAndFilename(show.title)
+        if filenameIsSet:
+            return fuzzyEpisode
+        else:
+            logging.info("Error: failed to set filename from fuzzy match data")
 
     logging.info("No episode match could be found. Exiting.")
     return 0
