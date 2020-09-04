@@ -25,8 +25,7 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
         ep.epNum = seasonEpisode
         ep.episodeName = targetProgram['subtitle']
         ep.description = targetProgram['description']
-        ep.seriestitle = targetProgram['title']
-        ep.filename = ep.seriestitle.replace(' ','_') + '-' + ep.epNum
+        ep.setSeriesAndFilename(targetProgram['title'])
         return ep
     else:
         logging.info("Can't find season and episode numbers from MythTV")
@@ -41,8 +40,7 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     exactEpisode = exactMatch(show,targetProgram['subtitle'])
     if exactEpisode != None:
         logging.info("Exact match! %s", exactEpisode.epNum)
-        exactEpisode.filename = filenamePreamble + '-' + fuzzyEpisode.epNum
-        exactEpisode.seriestitle = show.title
+        exactEpisode.setSeriesAndFilename(show.title)
         return exactEpisode
     logging.info("No exact match found.")
 
@@ -58,8 +56,7 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     fuzzyEpisode = fuzzyMatch(show,targetProgram['subtitle'],fuzzyRatio,targetProgram['airdate'])
     if fuzzyEpisode != None:
         logging.info("Fuzzy match ratio: %s", fuzzyEpisode.epNum)
-        fuzzyEpisode.filename = filenamePreamble + '-' + fuzzyEpisode.epNum
-        fuzzyEpisode.seriestitle = show.title
+        fuzzyEpisode.setSeriesAndFilename(show.title)
         return fuzzyEpisode
 
     logging.info("No episode match could be found. Exiting.")
@@ -71,7 +68,7 @@ def deleteMythRecording(basename):
 def exactMatch(show, subtitle):
     for ep in reversed(show.episodes):
         if ep.episodeName == subtitle:
-            return(ep)
+            return ep
     return None
 
 def searchByDate(show,airdateObj):
@@ -201,3 +198,12 @@ class Episode:
         self.episodeName = episodeName
         self.airdate = airdate
         self.description = description
+
+    def setSeriesAndFilename(self, seriesTitle):
+        """Sets seriestitle and filename. Depends on epNum already being set. Returns True if successful, False if not"""
+        if self.epNum != None:
+            self.seriestitle = seriesTitle
+            self.filename = seriesTitle.replace(' ','_') + '-' + self.epNum
+            return True
+        else:
+            return False
