@@ -65,7 +65,7 @@ def getEpNum_mythtv(targetProgram):
         if filenameIsSet:
             return ep
         else:
-            logging.info("Error: failed to set filename from MythTV season/episode data"
+            logging.info("Error: failed to set filename from MythTV season/episode data")
     return None
 
 def deleteMythRecording(basename):

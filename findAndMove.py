@@ -18,8 +18,8 @@ def main():
             sys.exit(1)
         if os.path.isdir(os.path.join(storageDir,matchedEpisode.seriestitle)) == False:
             logging.info("making directory for this show: %s",os.path.join(storageDir,matchedEpisode.seriestitle))
-            os.mkdir(os.path.join(storageDir,seriesName),0o0777)
-            os.chmod(os.path.join(storageDir,seriesName),0o0777)
+            os.mkdir(os.path.join(storageDir,matchedEpisode.seriestitle),0o0777)
+            os.chmod(os.path.join(storageDir,matchedEpisode.seriestitle),0o0777)
         fileDestination = os.path.join(storageDir,matchedEpisode.seriestitle,matchedEpisode.filename+os.path.splitext(recordingFile)[-1])
         if os.path.exists(fileDestination):
             logging.error("ERROR: aborting, file already exists at: %s", fileDestination)
