@@ -41,7 +41,7 @@ def getDbObject(credentials=getCredentials(mythConfig)):
 def getBeObject(databaseObj=getDbObject()):
     return MythBE(db=databaseObj)
 
-def getProgramObjectFromFilename(basename,dbObj,beObj):
+def getProgramObjectFromFilename(basename,dbObj=getDbObject(),beObj=getBeObject()):
     """
     Returns a MythTV program object (type is MythTV.mythproto.Program)
     Seem convoluted to have to search for it in this way... FIXME: better search?

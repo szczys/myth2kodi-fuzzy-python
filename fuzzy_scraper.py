@@ -16,6 +16,21 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     logging.info("Getting program info from mythtv using filename: %s", recordingFilename)
     targetProgram = getProgramObjectFromFilename(recordingFilename, getDbObject(), getBeObject())
 
+    #If MythTV metadata is enabled the season and episode may already be known
+    logging.info("Checking MythTV for Season/Episode Numbers")
+    if targetProgram['season'] != None and targetProgram['episode'] != None:
+        seasonEpisode = 'S' + str(targetProgram['season']) + 'E' + str(targetProgram['episode'])
+        logging.info("Episode Found: %s" % seasonEpisode)
+        ep = Episode()
+        ep.epNum = seasonEpisode
+        ep.episodeName = targetProgram['subtitle']
+        ep.description = targetProgram['description']
+        ep.seriestitle = targetProgram['title']
+        ep.filename = ep.seriestitle.replace(' ','_') + '-' + ep.epNum
+        return ep
+    else:
+        logging.info("Can't find season and episode numbers from MythTV")
+
     #Get DB info
     logging.info("Loading show info from tvdb: %s", targetProgram['title'])
     show = getShow(targetProgram['title'])
@@ -42,7 +57,7 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     logging.info("Trying fuzzy match of episode name.")
     fuzzyEpisode = fuzzyMatch(show,targetProgram['subtitle'],fuzzyRatio,targetProgram['airdate'])
     if fuzzyEpisode != None:
-        logging.info("Fuzzyr match ratio: %s", fuzzyEpisode.epNum)
+        logging.info("Fuzzy match ratio: %s", fuzzyEpisode.epNum)
         fuzzyEpisode.filename = filenamePreamble + '-' + fuzzyEpisode.epNum
         fuzzyEpisode.seriestitle = show.title
         return fuzzyEpisode
@@ -185,4 +200,4 @@ class Episode:
         self.epNum = epNum
         self.episodeName = episodeName
         self.airdate = airdate
-        self.descriptio = description
+        self.description = description
