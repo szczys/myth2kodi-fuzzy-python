@@ -26,7 +26,7 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     exactEpisode = exactMatch(show,targetProgram['subtitle'])
     if exactEpisode != None:
         logging.info("Exact match! %s", exactEpisode.epNum)
-        exactEpisode.filename = filenamePreamble + fuzzyEpisode.epNum
+        exactEpisode.filename = filenamePreamble + '-' + fuzzyEpisode.epNum
         exactEpisode.seriestitle = show.title
         return exactEpisode
     logging.info("No exact match found.")
@@ -43,7 +43,7 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     fuzzyEpisode = fuzzyMatch(show,targetProgram['subtitle'],fuzzyRatio,targetProgram['airdate'])
     if fuzzyEpisode != None:
         logging.info("Fuzzyr match ratio: %s", fuzzyEpisode.epNum)
-        fuzzyEpisode.filename = filenamePreamble + fuzzyEpisode.epNum
+        fuzzyEpisode.filename = filenamePreamble + '-' + fuzzyEpisode.epNum
         fuzzyEpisode.seriestitle = show.title
         return fuzzyEpisode
 

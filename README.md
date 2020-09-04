@@ -28,7 +28,7 @@ You must set the following values:
 
 ## Moving files to Showings
 
-When a file is not moved automatically, it't nice to have a manual option to get it out of Mythtv and into the library hiearchy. This is what the moveToShowins.py is for. And in many cases, the `syndicatedepisode` value put into the title of these files will make them automatically scraped by Plex after moving. Here's the user job for this task:
+When a file is not moved automatically, it's nice to have a manual option to get it out of Mythtv and into the library hiearchy. This is what the moveToShowins.py is for. And in many cases, the `syndicatedepisode` value put into the title of these files will make them automatically scraped by Plex after moving. Here's the user job for this task:
 
 ```
 /usr/bin/python3 /home/mythtv/myth2kodi-fuzzy-python/moveToShowings.py "%DIR%" "%FILE%"
