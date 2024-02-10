@@ -19,7 +19,7 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     #If MythTV metadata is enabled the season and episode may already be known
     episode = getEpNum_mythtv(targetProgram)
     logging.info("Checking MythTV for Season/Episode Numbers")
-    if episode != None:
+    if episode != None and episode != 0:
         return episode
     else:
         logging.info("Can't find season and episode numbers from MythTV")
@@ -54,7 +54,7 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     return 0
 
 def getEpNum_mythtv(targetProgram):
-    if targetProgram['season'] != None and targetProgram['episode'] != None:
+    if targetProgram['season'] != None and targetProgram['episode'] != None and targetProgram['episode'] != 0:
         seasonEpisode = 'S' + str(targetProgram['season']) + 'E' + str(targetProgram['episode'])
         logging.info("Episode Found: %s" % seasonEpisode)
         ep = Episode()
