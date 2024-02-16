@@ -18,7 +18,8 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
 
     #If MythTV metadata is enabled the season and episode may already be known
     episode = getEpNum_mythtv(targetProgram)
-    logging.info("Checking MythTV for Season/Episode Numbers")
+    logging.info(f"Checking MythTV for Season/Episode Numbers: {episode}")
+
     if episode != None and episode != 0:
         return episode
     else:
@@ -83,21 +84,21 @@ def searchByDate(show,airdateObj):
     Return list of episode objects if found, empty if not
     """
     foundEpisodes = list()
-    
+
     for ep in show.episodes:
         try:
             tvdbAirdate = datetime.datetime.strptime(ep.airdate, '%B %d, %Y').date()
         except:
             #Skip this one. Good enough is good enough
             continue
-            
+
         if tvdbAirdate == airdateObj:
             logging.info("Found: %s", ep.epNum)
-            foundEpisodes.append(ep)        
+            foundEpisodes.append(ep)
     return foundEpisodes
 
 def fuzzyScore(string1, string2):
-    return fuzz.token_set_ratio(string1,string2)
+    return fuzz.token_sort_ratio(string1,string2)
 
 def fuzzyMatch(show,subtitle,minRatio,airdateObj=None):
     found = list()
@@ -204,6 +205,9 @@ class Episode:
         self.episodeName = episodeName
         self.airdate = airdate
         self.description = description
+
+    def __str__(self):
+        return f'Number: {self.epNum} | Title: {self.episodeName} | Air Date: {self.airdate} | Description: {self.description}'
 
     def setSeriesAndFilename(self, seriesTitle):
         """Sets seriestitle and filename. Depends on epNum already being set. Returns True if successful, False if not"""

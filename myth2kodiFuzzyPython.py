@@ -95,8 +95,7 @@ def deleteShow(filename):
     os.system(systemCmd)
 
 def fuzzyScore(string1, string2):
-    #return fuzz.partial_ratio(string1,string2)
-    return fuzz.token_set_ratio(string1,string2)
+    return fuzz.token_sort_ratio(string1,string2)
 
 def fuzzyMatch(title,subtitle,show,minRatio):
     found = list()
