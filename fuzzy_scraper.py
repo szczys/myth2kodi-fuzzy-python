@@ -12,7 +12,7 @@ from mythPythonBindings import getProgramObjectFromFilename, getDbObject, getBeO
 showUrlPrefix = 'https://thetvdb.com/series/'
 showUrlSuffix = '/allseasons/official'
 
-def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
+def identifyMythtvEpisode(recordingFilename,fuzzyRatio=74):
     logging.info("Getting program info from mythtv using filename: %s", recordingFilename)
     targetProgram = getProgramObjectFromFilename(recordingFilename, getDbObject(), getBeObject())
 
@@ -30,6 +30,7 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=85):
     show = getShow(targetProgram['title'])
 
     #Try exact expisode title match
+    logging.info(f"Target episode name: {targetProgram['subtitle']}")
     logging.info("Trying exact match...")
     exactEpisode = exactMatch(show,targetProgram['subtitle'])
     if exactEpisode != None:
@@ -103,14 +104,18 @@ def fuzzyScore(string1, string2):
 def fuzzyMatch(show,subtitle,minRatio,airdateObj=None):
     found = list()
     bestRatio = 0
+    bestEp = None
     for ep in show.episodes:
         ratio = fuzzyScore(ep.episodeName,subtitle)
         if ratio > bestRatio:
             bestRatio = ratio
+            bestEp = ep
         if ratio > minRatio:
             found.append((ep,ratio))
+
     if len(found) == 0:
-        logging.info("fuzzyMatch found a ratio of %d, but that's below the minimum of %d.",bestRatio,minRatio)
+        logging.info(f"fuzzyMatch found a ratio of {bestRatio}, but that's below the minimum of {minRatio}.")
+        logging.info(f"Closet match was: {bestRatio} :: {bestEp.episodeName}")
         return None
     else:
         topIdxRatio = max(enumerate(map(itemgetter(-1), found)),key=itemgetter(1))
