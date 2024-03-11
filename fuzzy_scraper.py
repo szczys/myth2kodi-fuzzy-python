@@ -1,73 +1,72 @@
+from mythPythonServices import getProgramFromFilename, deleteProgram
+from myth2kodi_classes import Show, Episode
+
 from bs4 import BeautifulSoup
 from fuzzy_logger import logging
 import requests
 import string
 import datetime
+
 #pip3 install python-Levenshtein
 #pip3 install fuzzywuzzy
 from fuzzywuzzy import fuzz
 from operator import itemgetter
-from mythPythonBindings import getProgramObjectFromFilename, getDbObject, getBeObject, deleteProgram
 
 showUrlPrefix = 'https://thetvdb.com/series/'
 showUrlSuffix = '/allseasons/official'
 
-def identifyMythtvEpisode(recordingFilename,fuzzyRatio=74):
+def identifyMythtvEpisode(recordingFilename,fuzzyRatio=74) -> Episode | None:
     logging.info("Getting program info from mythtv using filename: %s", recordingFilename)
-    targetProgram = getProgramObjectFromFilename(recordingFilename, getDbObject(), getBeObject())
 
-    #If MythTV metadata is enabled the season and episode may already be known
-    episode = getEpNum_mythtv(targetProgram)
-    logging.info(f"Checking MythTV for Season/Episode Numbers: {episode}")
+    targetProgram = getProgramFromFilename(recordingFilename)
 
-    if episode != None and episode != 0:
-        return episode
-    else:
-        logging.info("Can't find season and episode numbers from MythTV")
+    if targetProgram is None:
+        logging.error(f"Mythtv cannot find program based on filename: {recordingFilename}")
+        return None
+
+    if targetProgram.epNum is not None:
+        logging.info(f'Found: {targetProgram.myth_dict["Title"]} '
+                     f'Season: {targetProgram.myth_dict["Season"]} '
+                     f'Episode: {targetProgram.myth_dict["Episode"]} '
+                     f'SubTitle: {targetProgram.myth_dict["SubTitle"]}'
+                     )
+        return targetProgram
+
+    logging.info(f"Mythtv season/episode number not found for {targetProgram.title}, {targetProgram.episodeName}")
 
     #Get DB info
-    logging.info("Loading show info from tvdb: %s", targetProgram['title'])
-    show = getShow(targetProgram['title'])
+    logging.info("Loading show info from tvdb: %s", targetProgram.title)
+    show = getShow(targetProgram.title)
 
     #Try exact expisode title match
-    logging.info(f"Target episode name: {targetProgram['subtitle']}")
+    logging.info(f"Target episode name: {targetProgram.episodeName}")
     logging.info("Trying exact match...")
-    exactEpisode = exactMatch(show,targetProgram['subtitle'])
+    exactEpisode = exactMatch(show, targetProgram.episodeName)
     if exactEpisode != None:
         logging.info("Exact match! %s", exactEpisode.epNum)
-        filenameIsSet = exactEpisode.setSeriesAndFilename(show.title)
+        filenameIsSet = exactEpisode.setFilename(show.title)
         if filenameIsSet:
+            exactEpisode.myth_dict = targetProgram.myth_dict
             return exactEpisode
         else:
             logging.info("Error: failed to set filename from exact match data")
     logging.info("No exact match found.")
 
     logging.info("Trying fuzzy match of episode name.")
-    fuzzyEpisode = fuzzyMatch(show,targetProgram['subtitle'],fuzzyRatio,targetProgram['airdate'])
+    fuzzyEpisode = fuzzyMatch(show,
+                              targetProgram['SubTitle'],
+                              fuzzyRatio,
+                              targetProgram['Airdate'])
     if fuzzyEpisode != None:
         logging.info("Fuzzy match ratio: %s", fuzzyEpisode.epNum)
-        filenameIsSet = fuzzyEpisode.setSeriesAndFilename(show.title)
+        filenameIsSet = fuzzyEpisode.setFilename(show.title)
         if filenameIsSet:
+            fuzzyEpisode.myth_dict = targetProgram.myth_dict
             return fuzzyEpisode
         else:
             logging.info("Error: failed to set filename from fuzzy match data")
 
     logging.info("No episode match could be found. Exiting.")
-    return 0
-
-def getEpNum_mythtv(targetProgram):
-    if targetProgram['season'] != None and targetProgram['episode'] != None and targetProgram['episode'] != 0:
-        seasonEpisode = 'S' + str(targetProgram['season']) + 'E' + str(targetProgram['episode'])
-        logging.info("Episode Found: %s" % seasonEpisode)
-        ep = Episode()
-        ep.epNum = seasonEpisode
-        ep.episodeName = targetProgram['subtitle']
-        ep.description = targetProgram['description']
-        filenameIsSet = ep.setSeriesAndFilename(targetProgram['title'])
-        if filenameIsSet:
-            return ep
-        else:
-            logging.info("Error: failed to set filename from MythTV season/episode data")
     return None
 
 def deleteMythRecording(basename):
@@ -101,7 +100,7 @@ def searchByDate(show,airdateObj):
 def fuzzyScore(string1, string2):
     return fuzz.token_sort_ratio(string1,string2)
 
-def fuzzyMatch(show,subtitle,minRatio,airdateObj=None):
+def fuzzyMatch(show, subtitle, minRatio, airdateObj=None):
     found = list()
     bestRatio = 0
     bestEp = None
@@ -147,23 +146,24 @@ def fuzzyMatch(show,subtitle,minRatio,airdateObj=None):
             logging.info("Fuzzy match failed, this needs to be sorted out manually")
             return None
 
-def getShow(showTitle):  
+def getShow(showTitle):
     html = getHtmlByTitle(showTitle)
     if html == None:
         logging.info("Cannot get show, not html returned from tvdb")
         return None
-    
+
     soup = BeautifulSoup(html, 'lxml')
-    
+
     showTitle = soup.find('div',{'class','crumbs'}).findAll('a')[2].text.strip()
-    
+
     allEpisodes=soup.findAll("li", {"class", "list-group-item"})
     episodeList = []
 
     for e in allEpisodes:
         thisEp = Episode()
-        
+
         try:
+            thisEp.title = showTitle
             thisEp.epNum = e.find("span",{"class", "episode-label"}).text
             thisEp.episodeName = e.find("a").text.strip()
             thisEp.airdate = e.find('ul').find('li').text
@@ -192,33 +192,3 @@ def getHtmlByTitle(showTitle):
             return r.content
     except:
         return None
-    
-class Show:
-    def __init__(self, title, episodes=[]):
-        self.title = title
-        self.episodes = episodes
-
-    def getByEpisodeNumber(self, episodeNumber):
-        for e in self.episodes:
-            if e.epNum == episodeNumber:
-                return e
-        return None
-
-class Episode:
-    def __init__(self, epNum=None, episodeName=None, airdate=None, description=None):
-        self.epNum = epNum
-        self.episodeName = episodeName
-        self.airdate = airdate
-        self.description = description
-
-    def __str__(self):
-        return f'Number: {self.epNum} | Title: {self.episodeName} | Air Date: {self.airdate} | Description: {self.description}'
-
-    def setSeriesAndFilename(self, seriesTitle):
-        """Sets seriestitle and filename. Depends on epNum already being set. Returns True if successful, False if not"""
-        if self.epNum != None:
-            self.seriestitle = seriesTitle
-            self.filename = seriesTitle.replace(' ','_') + '-' + self.epNum
-            return True
-        else:
-            return False
