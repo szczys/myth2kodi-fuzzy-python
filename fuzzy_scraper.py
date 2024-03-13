@@ -54,9 +54,9 @@ def identifyMythtvEpisode(recordingFilename,fuzzyRatio=74) -> Episode | None:
 
     logging.info("Trying fuzzy match of episode name.")
     fuzzyEpisode = fuzzyMatch(show,
-                              targetProgram['SubTitle'],
+                              targetProgram.episodeName,
                               fuzzyRatio,
-                              targetProgram['Airdate'])
+                              targetProgram.airdate)
     if fuzzyEpisode != None:
         logging.info("Fuzzy match ratio: %s", fuzzyEpisode.epNum)
         filenameIsSet = fuzzyEpisode.setFilename(show.title)
