@@ -2,9 +2,10 @@ from MythTV import MythDB
 from MythTV import MythBE
 
 import sys
+import os
 from shutil import copyfile
 from fuzzy_logger import logging
-from mythPythonBindings import *
+from mythPythonServices import *
 
 #This will move files that can't be automatically categorized to
 #the showings directory, retaining as much useful info as possible
@@ -20,8 +21,13 @@ def main():
     logging.info("======================")
     logging.info("Attempting to move to showings: %s", recordingFile)
 
-    episodeObj = getProgramObjectFromFilename(recordingFile,getDbObject(), getBeObject())
-    newFilename = "%s-%s-%s-%s___%s.ts" % (episodeObj['title'], str(episodeObj['syndicatedepisode']), episodeObj['subtitle'], str(episodeObj['airdate']), str(episodeObj['starttime']).replace(' ','_'))
+    targetProgram = getProgramFromFilename(recordingFile)
+
+    newFilename = "%s-%s-%s-%s___%s.ts" % (targetProgram.title,
+                                           targetProgram.myth_dict['ProgramId'],
+                                           targetProgram.myth_dict['SubTitle'],
+                                           targetProgram.airdate,
+                                           targetProgram.myth_dict['StartTime'].replace(' ','_'))
  
     if os.path.isdir(storageDir) == False:
         logging.info("storageDir doesn't exist, aborting: %s", storageDir)
@@ -39,7 +45,7 @@ def main():
     os.chmod(fileDestination,0o777)
     logging.info("File copied successfully")
     logging.info("Deleting %s",recordingFile)
-    deleteProgram(recordingFile)
+    deleteProgram(targetProgram.myth_dict)
     logging.info("Operation complete. Exiting.")
     sys.exit(0)
 
