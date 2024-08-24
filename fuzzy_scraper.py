@@ -114,7 +114,8 @@ def fuzzyMatch(show, subtitle, minRatio, airdateObj=None):
 
     if len(found) == 0:
         logging.info(f"fuzzyMatch found a ratio of {bestRatio}, but that's below the minimum of {minRatio}.")
-        logging.info(f"Closet match was: {bestRatio} :: {bestEp.episodeName}")
+        if bestEp is not None:
+            logging.info(f"Closet match was: {bestRatio} :: {bestEp.episodeName}")
         return None
     else:
         topIdxRatio = max(enumerate(map(itemgetter(-1), found)),key=itemgetter(1))
